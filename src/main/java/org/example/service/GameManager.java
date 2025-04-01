@@ -106,7 +106,7 @@ public class GameManager {
             hero.setGolds(hero.getGolds() + golds);
             System.out.println("You received " + golds + " golds!");
         } else {
-            golds = random * hero.getLvl() / 6;
+            golds = random * hero.getLvl() / 8;
             if (hero.getGolds() > golds) {
                 hero.setGolds(hero.getGolds() - golds);
                 System.out.println("You lost " + golds + " golds. Golds left: " + hero.getGolds());

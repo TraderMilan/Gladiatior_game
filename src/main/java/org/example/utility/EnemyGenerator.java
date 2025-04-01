@@ -158,7 +158,7 @@ public class EnemyGenerator {
                 14, new Enemy("Hydra", new HashMap<>(Map.of(
                         Ability.ATTACK, 14,
                         Ability.DEFENCE, 19,
-                        Ability.DEXTERITY, 19,
+                        Ability.DEXTERITY, 17,
                         Ability.SKILL, 17,
                         Ability.LUCK, 10,
                         Ability.HEALTH, 170
@@ -202,8 +202,8 @@ public class EnemyGenerator {
                 18, new Enemy("Abyssal Wyrm", new HashMap<>(Map.of(
                         Ability.ATTACK, 37,
                         Ability.DEFENCE, 42,
-                        Ability.DEXTERITY, 45,
-                        Ability.SKILL, 39,
+                        Ability.DEXTERITY, 41,
+                        Ability.SKILL, 35,
                         Ability.LUCK, 28,
                         Ability.HEALTH, 450
                 )))
@@ -211,7 +211,7 @@ public class EnemyGenerator {
 
         enemies.put(
                 19, new Enemy("God of War The", new HashMap<>(Map.of(
-                        Ability.ATTACK, 47,
+                        Ability.ATTACK, 44,
                         Ability.DEFENCE, 45,
                         Ability.DEXTERITY, 51,
                         Ability.SKILL, 45,
