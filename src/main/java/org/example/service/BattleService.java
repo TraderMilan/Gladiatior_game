@@ -14,7 +14,7 @@ import java.util.List;
 
 public class BattleService {
 
-
+    // Main battle cycle, returns true if hero won
     public boolean fight(Hero hero, Enemy enemy) throws InterruptedException {
         int count = 1;
         int fullHealth = hero.getAbilities().get(Ability.HEALTH);
@@ -30,6 +30,7 @@ public class BattleService {
 
             if (count % 2 != 0) {
 
+                // Only if you use elixir for invisibility
                 if (invisible > 0 && invisible <= 2) {
                     if (invisible < 2) {
                         count--;
@@ -43,12 +44,12 @@ public class BattleService {
                 int move = battleChoices(hero, enemy);
 
                 switch (move) {
-                    case 1 -> {
+                    case 1 -> { // Normal hit
                         int hit = damage(hero, enemy);
                         System.out.println(hero.getName() + " deals " + hit + " damage to " + enemy.getName());
                         enemy.setHealthAfterDamage(hit);
                     }
-                    case 2 -> {
+                    case 2 -> { // Aggressive attack, chance of hitting based on your attack and opponent´s defence
                         int random = (int) (Math.random() * 100) + 1;
                         if (chanceForCriticalHit(hero, enemy) >= random) {
                             int hit = (int) (damage(hero, enemy) * 1.5);
@@ -59,7 +60,7 @@ public class BattleService {
                         }
 
                     }
-                    case 3 -> {
+                    case 3 -> { // Elixir impl
                         if (hero.getElixirs().isEmpty()) {
                             System.out.println("You have no elixirs to use.");
                             count--;
@@ -78,6 +79,8 @@ public class BattleService {
                         System.out.println("0. Go back");
 
                         int elixirChoice;
+
+                        // Valid elixir choice check
                         while (true) {
                             elixirChoice = InputUtils.readInt();
 
@@ -91,7 +94,7 @@ public class BattleService {
                             System.out.println("Invalid choice, try again: ");
 
                         }
-                        if(elixirChoice == 0){
+                        if (elixirChoice == 0) { // If true, you used invisible elixir and opponent will miss next 2 rounds
                             count++;
                             break;
                         }
@@ -110,7 +113,7 @@ public class BattleService {
                 }
 
 
-            } else {
+            } else { // Opponent´s turn
                 int hitE = damage(enemy, hero);
                 System.out.println(enemy.getName() + " deals " + hitE + " damage to " + hero.getName());
                 hero.setHealthAfterDamage(hitE);
@@ -138,6 +141,7 @@ public class BattleService {
         }
     }
 
+    // Aggressive attack % of hitting based on attack and opponent´s defence
     public int chanceForCriticalHit(Hero hero, Enemy enemy) {
         int attack = hero.getAbilities().get(Ability.ATTACK);
         int defence = enemy.getAbilities().get(Ability.DEFENCE);
@@ -160,9 +164,10 @@ public class BattleService {
     }
 
 
+    //Damage calculator based on you luck, attack and dexterity vs opponent´s defence and dexterity
     public int damage(Character attacker, Character defender) {
         int damage = (int) ((attacker.getAbilities().get(Ability.ATTACK) * 2) + attacker.getAbilities().get(Ability.DEXTERITY)
-                                - (defender.getAbilities().get(Ability.DEFENCE) * 1.5)  - defender.getAbilities().get(Ability.DEXTERITY));
+                - (defender.getAbilities().get(Ability.DEFENCE) * 1.5) - defender.getAbilities().get(Ability.DEXTERITY));
         int minDamage = attacker.getAbilities().get(Ability.SKILL);
 
         if (damage <= 0) {
@@ -170,6 +175,8 @@ public class BattleService {
         }
 
         int dealtDamage = (int) (Math.random() * damage) + minDamage;
+
+        //Chance for critical hit
         int critical = (attacker.getAbilities().get(Ability.LUCK) * 2) + attacker.getAbilities().get(Ability.SKILL);
         int chanceForCritical = (int) (Math.random() * 200) + 1;
         if (critical >= chanceForCritical) {

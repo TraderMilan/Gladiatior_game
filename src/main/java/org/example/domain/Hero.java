@@ -31,11 +31,16 @@ public class Hero extends Character {
         super(name, abilities);
 
     }
+
+    //Only when loading
     public void loadWeapon(Weapon weapon){
         this.weapon = weapon;
     }
 
+    // If buying weapon
     public void setWeapon(Weapon weapon) {
+
+        // Removes points of your previous weapon
         if (getWeapon() != null) {
             for (Map.Entry<Ability, Integer> upgrades : getWeapon().getIncreases().entrySet()) {
                 if (upgrades.getKey().equals(Ability.HEALTH)) {
@@ -48,6 +53,7 @@ public class Hero extends Character {
 
         this.weapon = weapon;
 
+        // Adds points to abilities
         for (Map.Entry<Ability, Integer> upgrades : weapon.getIncreases().entrySet()) {
             if (upgrades.getKey().equals(Ability.HEALTH)) {
                 upgradeAbility(upgrades.getKey(), getAbilities().get(upgrades.getKey()) + (upgrades.getValue() * Constant.HEALTH_POINTS));
@@ -60,6 +66,7 @@ public class Hero extends Character {
 
     public int useElixir(Elixir elixir, int fullHealth) {
 
+        // Invisible elixir
         if (getElixirs() != null) {
             if (elixir.getName().equals("Shadowveil Draught")) {
                 return 0;
@@ -96,10 +103,12 @@ public class Hero extends Character {
         return 1;
     }
 
+    //When buying
     public void addElixir(Elixir elixir) {
         elixirs.add(elixir);
     }
 
+    //When loading
     public void setElixirs(List<Elixir> elixirs) {
         this.elixirs = elixirs;
     }
@@ -111,6 +120,7 @@ public class Hero extends Character {
     public Weapon getWeapon() {
         return weapon;
     }
+
 
     public void setGolds(int golds) {
         this.golds = golds;

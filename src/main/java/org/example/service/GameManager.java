@@ -33,6 +33,7 @@ public class GameManager {
         this.battleService = new BattleService();
     }
 
+    // Main game cycle
     public void startGame() throws InterruptedException {
         welcomePlayer();
 
@@ -72,11 +73,11 @@ public class GameManager {
 
                     }
 
-                } // FIGHT
-                case 1 -> abilitiesImpl(); //ABILITIES MANAGER
+                }
+                case 1 -> abilitiesImpl();
                 case 2 -> shopping();
-                case 3 -> saveImpl(); //SAVE GAME
-                case 4 -> {
+                case 3 -> saveImpl();
+                case 4 -> { // Exit game
                     System.out.println("Are you sure?\n0. No\n1. Yes ");
                     int quit = InputUtils.readInt();
                     if (quit == 0) {
@@ -86,7 +87,7 @@ public class GameManager {
                         System.out.println("Bye");
                         return;
                     }
-                } //EXIT GAME
+                }
                 default -> System.out.println("Invalid input, try again.");
 
             }
@@ -95,6 +96,7 @@ public class GameManager {
         System.out.println("You have won the game! CONGRATULATIONS!!!");
     }
 
+    // In case of winning calculates gold based on the strength of opponent and your current lvl
     public void goldImpl(Boolean status) {
         int enemiesTotalPoints = enemiesByLevel.get(hero.getLvl()).getAbilities().entrySet().stream()
                 .filter(ability -> !(ability.getKey().equals(Ability.HEALTH))).mapToInt(Map.Entry::getValue).sum();
@@ -164,6 +166,7 @@ public class GameManager {
 
     }
 
+    // Collects necessary data before saving the game
     private String collectHeroData(Hero hero) {
         StringBuilder sb = new StringBuilder();
         sb.append(hero.getLvl()).append("\n");
@@ -195,6 +198,7 @@ public class GameManager {
 
     }
 
+    // Upgrading abilities with upgrading points
     public void abilitiesImpl() {
         while (true) {
             System.out.println("Your abilities:");
@@ -262,6 +266,8 @@ public class GameManager {
         manager.upgradeHero(this.hero);
     }
 
+
+    // loads saved games
     public Hero loadImpl() {
         while (true) {
             final File[] savedFiles = new File("saved-games").listFiles();
@@ -304,6 +310,8 @@ public class GameManager {
         }
     }
 
+
+    // saved data into your hero
     public Hero stringToHero(String heroData) {
         String[] lines = heroData.split("\n");
         int lvl = (Integer.parseInt(lines[0]));

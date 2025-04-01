@@ -46,6 +46,7 @@ public class ShopService {
         return weaponShop;
     }
 
+
     public void printTools(Shop shop, Hero hero) {
         List<Tool> tools = shop.getTools();
         PrintUtils.printLongDivider();
@@ -67,6 +68,7 @@ public class ShopService {
         System.out.println("-- Golds: " + hero.getGolds());
         System.out.println("Select item you want to buy: ");
 
+        //choice validation
         while (true) {
             int choice = InputUtils.readInt();
 
@@ -80,7 +82,7 @@ public class ShopService {
                 System.out.println("You don´t have enough golds.");
             } else if (hero.getWeapon() != null && hero.getWeapon().getName().equals(tools.get(choice - 1).getName()) || hero.getElixirs().stream()
                     .map(Tool::getName).toList().contains(tools.get(choice-1).getName())) {
-                System.out.println("You already have this item.");
+                System.out.println("You already have this item."); //Cannot have duplicates
             }
             else {
                 System.out.println("Are you sure you want to buy " + tools.get(choice - 1).getName() + " for " + tools.get(choice - 1).getPrice() + " ?");
@@ -100,7 +102,7 @@ public class ShopService {
                     PrintUtils.printDivider();
                     return;
                 } else {
-                    System.out.println("Then don´t waste my time!");
+                    System.out.println("Then don´t waste my time!"); //Angry man when buying nothing
                     PrintUtils.printDivider();
                     break;
                 }
