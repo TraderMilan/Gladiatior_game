@@ -1,7 +1,6 @@
 package org.example.ability;
 
 import org.example.constant.Constant;
-import org.example.domain.Character;
 import org.example.domain.Hero;
 import org.example.utility.InputUtils;
 import org.example.utility.PrintUtils;
@@ -93,7 +92,7 @@ public class HeroAbilityManager {
                 || hero.getAbilities().get(abilityList.get(index)).equals(50)){
             System.out.println("You can´t remove points from this ability, it is already at it´s minimum lvl");
         } else {
-            hero.setAbilitiesReduce(abilityList.get(index));
+            hero.reduceAbilities(abilityList.get(index));
             System.out.println("You have removed "
                     + (abilityList.get(index).equals(Ability.HEALTH) ? (Constant.HEALTH_POINTS + " points"): (Constant.NORMAL_POINT + " point"))
                     + " from " + abilityList.get(index));

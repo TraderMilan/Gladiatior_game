@@ -8,7 +8,7 @@ public abstract class Character {
     protected String name;
     protected Map<Ability, Integer> abilities;
 
-    public Character(String name, Map<Ability, Integer> abilities){
+    public Character(String name, Map<Ability, Integer> abilities) {
         this.name = name;
         this.abilities = abilities;
     }
@@ -21,12 +21,18 @@ public abstract class Character {
         return abilities;
     }
 
-    public void setAbility(Ability ability, int value){
+    public void setAbilities(Map<Ability, Integer> abilities) {
+        this.abilities = abilities;
+    }
+
+
+    public void upgradeAbility(Ability ability, int value) {
         abilities.put(ability, value);
     }
 
-    public void setHealth(int damage){
-        this.setAbility(Ability.HEALTH, this.getAbilities().get(Ability.HEALTH) - damage);
+    public void setHealthAfterDamage(int damage) {
+        this.abilities.put(Ability.HEALTH, this.getAbilities().get(Ability.HEALTH) - damage);
+
     }
 
 }

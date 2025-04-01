@@ -2,16 +2,16 @@ package org.example.service;
 
 import org.example.ability.Ability;
 import org.example.ability.HeroAbilityManager;
-import org.example.constant.Constant;
 import org.example.domain.Enemy;
 import org.example.domain.Hero;
+import org.example.shopEntities.tools.Elixir;
+import org.example.shopEntities.tools.Weapon;
 import org.example.utility.EnemyGenerator;
 import org.example.utility.InputUtils;
 import org.example.utility.PrintUtils;
+import org.example.utility.ToolsGenerator;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -23,8 +23,10 @@ public class GameManager {
     private final HeroAbilityManager manager;
     private final Map<Integer, Enemy> enemiesByLevel;
     private final BattleService battleService;
+    private final ShopService shopService;
 
     public GameManager() {
+        this.shopService = new ShopService();
         this.hero = new Hero("nameless");
         this.manager = new HeroAbilityManager(hero);
         this.enemiesByLevel = EnemyGenerator.createEnemies();
@@ -41,31 +43,40 @@ public class GameManager {
             int choice = InputUtils.readInt();
             switch (choice) {
                 case 0 -> {
-                    if (this.battleService.isHeroReadyToBattle(hero, enemy)){
-                        int enemyHealth = enemiesByLevel.get(hero.getLvl()).getAbilities().get(Ability.HEALTH);
-                        int heroHealth = hero.getAbilities().get(Ability.HEALTH);
-                        if (battleService.fight(hero, enemy)){
-                            System.out.println("You have won!");
-                            System.out.println("You have gained " + hero.getLvl() + " points to spend on your abilities!");
-                            hero.setUpgradingPoints(hero.getLvl());
+                    if (this.battleService.isHeroReadyToBattle(hero, enemy)) {
+                        Map<Ability, Integer> abilitiesBeforeFight = new HashMap<>(hero.getAbilities());
+                        Map<Ability, Integer> enemyAbilitiesBeforeFight = new HashMap<>(enemy.getAbilities());
+
+                        if (battleService.fight(hero, enemy)) {
+                            System.out.println("You have won!!!");
+                            goldImpl(true);
+                            int upPoints = hero.getLvl();
+                            if (hero.getLvl() > 6){
+                                upPoints = upPoints/2;
+                            }
+                            System.out.println("You have gained " + upPoints + " points to spend on your abilities!");
+
+                            hero.setUpgradingPoints(upPoints);
                             hero.setLvl((hero.getLvl() + 1));
-                        }
-                        else {
+                        } else {
+                            goldImpl(false);
                             System.out.println("You have lost!");
-                            enemiesByLevel.get(hero.getLvl()).setAbility(Ability.HEALTH, enemyHealth);
+                            enemy.setAbilities(new HashMap<>(enemyAbilitiesBeforeFight));
                         }
 
-                        hero.setAbility(Ability.HEALTH, heroHealth);
+                        hero.setAbilities(new HashMap<>(abilitiesBeforeFight));
+
                         System.out.println("You have full health now.");
-                        PrintUtils.printDivider();
-                        PrintUtils.printDivider();
+                        PrintUtils.printBigDivider();
+
 
                     }
 
                 } // FIGHT
-                case 1 -> abilitiesImpl();
-                case 2 -> saveImpl();
-                case 3 -> {
+                case 1 -> abilitiesImpl(); //ABILITIES MANAGER
+                case 2 -> shopping();
+                case 3 -> saveImpl(); //SAVE GAME
+                case 4 -> {
                     System.out.println("Are you sure?\n0. No\n1. Yes ");
                     int quit = InputUtils.readInt();
                     if (quit == 0) {
@@ -75,14 +86,55 @@ public class GameManager {
                         System.out.println("Bye");
                         return;
                     }
-                }
+                } //EXIT GAME
                 default -> System.out.println("Invalid input, try again.");
 
             }
         }
 
-        System.out.println("You have the game! CONGRATULATIONS!!!");
+        System.out.println("You have won the game! CONGRATULATIONS!!!");
     }
+
+    public void goldImpl(Boolean status) {
+        int enemiesTotalPoints = enemiesByLevel.get(hero.getLvl()).getAbilities().entrySet().stream()
+                .filter(ability -> !(ability.getKey().equals(Ability.HEALTH))).mapToInt(Map.Entry::getValue).sum();
+
+        int golds;
+        int random = (int) ((Math.random() * enemiesTotalPoints) + (enemiesTotalPoints - hero.getLvl()));
+        if (status) {
+            golds = random * hero.getLvl() / 3;
+            hero.setGolds(hero.getGolds() + golds);
+            System.out.println("You received " + golds + " golds!");
+        } else {
+            golds = random * hero.getLvl() / 6;
+            if (hero.getGolds() > golds) {
+                hero.setGolds(hero.getGolds() - golds);
+                System.out.println("You lost " + golds + " golds. Golds left: " + hero.getGolds());
+            } else {
+                hero.setGolds(0);
+                System.out.println("You lost everything. Golds left: 0 ");
+            }
+
+        }
+
+
+    }
+
+    public void shopping() {
+        System.out.println("--- Select shop you want to visit ---");
+        System.out.println("0. Exit");
+        System.out.println("1. " + shopService.getElixirShop().getName() + "\n2. " + shopService.getWeaponShop().getName());
+        int choice = InputUtils.readInt();
+        switch (choice) {
+            case 0 -> System.out.println("Bye! ");
+            case 1 -> shopService.goToShop(hero, shopService.getElixirShop());
+            case 2 -> shopService.goToShop(hero, shopService.getWeaponShop());
+            default -> System.out.println("Invalid choice, try again");
+        }
+
+
+    }
+
 
     public void saveImpl() {
         while (true) {
@@ -120,6 +172,24 @@ public class GameManager {
         for (Ability ability : Ability.values()) {
             sb.append(ability).append(":").append(hero.getAbilities().get(ability)).append("\n");
         }
+        sb.append(hero.getGolds()).append("\n"); // golds
+
+
+        if (hero.getWeapon() == null) {
+            sb.append(" ").append("\n");
+        } else {
+            sb.append(hero.getWeapon().getName()).append("\n");
+        }
+
+        if (hero.getElixirs() == null) {
+            sb.append(" ").append("\n");
+        } else {
+            for (Elixir elixir : hero.getElixirs()) {
+                sb.append(elixir.getName()).append("\n");
+            }
+        }
+
+
         return sb.toString();
 
 
@@ -129,6 +199,11 @@ public class GameManager {
         while (true) {
             System.out.println("Your abilities:");
             PrintUtils.printAbilitiesInLine(hero);
+            System.out.print("Your weapon: ");
+            PrintUtils.printHeroWeapon(hero);
+            System.out.print("\nYour Elixirs: ");
+            PrintUtils.printHeroElixirs(hero);
+
             System.out.print("0. Go back\n1. Spend points (" + hero.getUpgradingPoints() + " points left)\n2. remove points");
             System.out.println("\nType command:");
             int choice = InputUtils.readInt();
@@ -161,7 +236,8 @@ public class GameManager {
         int choice = InputUtils.readInt();
         switch (choice) {
             case 0 -> {
-                System.out.println("Let´s go!"); PrintUtils.printDivider();
+                System.out.println("Let´s go!");
+                PrintUtils.printDivider();
             }
             case 1 -> {
                 Hero hero = loadImpl();
@@ -242,9 +318,36 @@ public class GameManager {
             abilities.put(ability, value);
 
         }
+        int golds = (Integer.parseInt(lines[9]));
+
         Hero newHero = new Hero(heroName, abilities);
         newHero.setUpgradingPoints(points);
         newHero.setLvl(lvl);
+        newHero.setGolds(golds);
+
+
+        if (!Objects.equals(lines[10], " ")) {
+            Weapon weapon = ToolsGenerator.getWeapon(lines[10]);
+            newHero.loadWeapon(weapon);
+        }
+
+        List <Elixir> elixirs = ToolsGenerator.generateElixirs();
+        List<String> heroElixirsNames = new ArrayList<>();
+        for(int i = 11; i < lines.length; i++){
+            heroElixirsNames.add(lines[i]);
+        }
+
+        List<Elixir> heroElixirs = new ArrayList<>();
+        for(Elixir elixir: elixirs){
+            for (String name: heroElixirsNames){
+                if (name.equals(elixir.getName())){
+                    heroElixirs.add(elixir);
+                }
+            }
+        }
+
+        newHero.setElixirs(heroElixirs);
+
 
         return newHero;
 
